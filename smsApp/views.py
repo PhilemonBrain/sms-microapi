@@ -1334,7 +1334,7 @@ class TeleSignCollectionSms(generics.CreateAPIView):
         # msgstat =[]
 
         numbers = getNumbersFromList(receiver)
-        print(number)
+        print(numbers)
         serializer = MessageSerializer(data=request.data)
 
         if serializer.is_valid():
