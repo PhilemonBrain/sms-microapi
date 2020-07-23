@@ -3,7 +3,7 @@ from .views import SendSingMsgCreate, TransactionID
 from .views import RecipientCreate, RecipientList, RecipientDetail, RecipientsForUser
 from .views import InfobipSendMessage, InfobipSingleMessage, InfobipMessageList, InfobipSendMessage2
 from .views import translateMessages, MessageDelete, MessageCounter, TwilioSendSms, sms_list
-from .views import TeleSignSingleSms, TeleSignMessageList, TeleSignTransactionID3
+from .views import TeleSignSingleSms, TeleSignMessageList, TeleSignTransactionID3, TeleSignCollectionSms
 from .views import TeleSignCollectionSms, MessageRecall
 from .views import GroupList, GroupBySenderList, GroupDetail, GroupCreate, GroupDelete, GroupNumbersList, GroupNumbersBySenderList, GroupNumbersCreate, update_group_number, GroupNumbersDetail
 from .views import SmsHistoryList, SmsHistoryDetail, SendGroupSms, SendFlashSms
@@ -63,6 +63,7 @@ urlpatterns = [
 
    #TeleSign Views
    # path("v1/sms/telesign/group_sms", TeleSignGroupSms.as_view(), name="telesign-group-message"),
+   path("v1/sms/telesign/list_group", TeleSignCollectionSms.as_view(), name="telesign-list-group-message"),
    path("v1/sms/telesign/send_sms", TeleSignSingleSms.as_view(), name="telesign-send-message"),
    path("v1/sms/telesign/view_all_sms", TeleSignMessageList.as_view(), name="telesign-sent-messages"),
    path("v1/sms/telesign/<transactionID>", TeleSignTransactionID3.as_view(), name="telesign-sent-messages3"),

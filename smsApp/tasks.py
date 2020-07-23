@@ -31,7 +31,7 @@ def singleMessageSchedule(mydata, messageID):
     print(f'message is {message}')
     if response['status']['code'] == 290:
         message.transactionID=response['reference_id'],
-        message.messageStatus="S"
+        message.messageStatus="P"
         message.save()
         print("saving sent message")
     else:
@@ -53,12 +53,12 @@ def getNumbersFromList(stringOfNumbers):
 
 
 @shared_task
-def listMessageSchedule(mydata, messageID):
+def listMessageSchedule(mydata):
     '''
     This async task is similar to the group sms just that it'll take in a sting of numb seperated by comma
     instead of saving a group to the db. I hope it works
 
-    PS it's a work in
+    PS it's a work in progress
     '''
     api_key = 'HXwu/7gWs9KMHWilug9NPccJe+nZtUaG6TtfmxikOgQeCP5ErX7uGxIqpufdF2b93Qed9B/WcudRiveDXfaf2Q=='
     customer_id = 'ACECBD93-21C7-4B8B-9300-33FDEBC27881'
@@ -67,29 +67,27 @@ def listMessageSchedule(mydata, messageID):
     headers = {
         'Accept': 'application/json',
         'Content-Type': 'application/x-www-form-urlencoded'}
-
-    data = {
-        'phone_number': mydata['receiver'],
-        'message': mydata['text'],
-        'message_type': 'ARN'}
-    r = requests.post(url, auth=HTTPBasicAuth(
-                customer_id, api_key), data=data, headers=headers)
-    response = r.json()
-    # print('We are 1')
-    print(f'This is messageID1 {messageID}')
-    message = Message.objects.filter(messageID=messageID).first()
-    print(f'This is messageID2 {messageID}')
-    print(f'message is {message}')
-    if response['status']['code'] == 290:
-        message.transactionID=response['reference_id'],
-        message.messageStatus="S"
-        message.save()
-        print("saving sent message")
-    else:
-        message.messageStatus="F"
-        print("saving failed message")
-        message.save()
-    # print('We are 4')
+    # numbers = getNumbersFromList(mydata['receiver'])
+    # for number in numbers
+    messages = Message.objects.filter(grouptoken=mydata['grouptoken'])
+    for message in messages:
+        data = {
+            'phone_number': message.receiver,
+            'message': mydata['text'],
+            'message_type': 'ARN'}
+        r = requests.post(url, auth=HTTPBasicAuth(
+                    customer_id, api_key), data=data, headers=headers)
+        response = r.json()
+        if response['status']['code'] == 290:
+            message.transactionID=response['reference_id'],
+            message.messageStatus="P"
+            message.save()
+            print("saving sent message")
+        else:
+            message.messageStatus="F"
+            print("saving failed message")
+            message.save()
+        # print('We are 4')
     return 
 
 
