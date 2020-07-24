@@ -1,3 +1,4 @@
+from  django.core.exceptions import ObjectDoesNotExist
 from rest_framework import serializers
 from .models import Recipient, Message, Group, GroupNumbers, SenderDetails, Sender
 import uuid
@@ -28,7 +29,7 @@ class MessageSerializer(serializers.ModelSerializer):
     grouptoken = serializers.CharField(read_only=True)
     dateScheduled = serializers.DateTimeField(default=timezone.now())
     date_created = serializers.CharField(read_only=True)
-    dateScheduled = serializers.DateField()
+    # dateScheduled = serializers.DateField()
     messageStatus = serializers.ChoiceField(choices=['D', 'S','F','R','P','U','SC'], read_only=True)
     language = serializers.ChoiceField(choices=Message.LANG_CHOICES, default='en', required=False)
     transactionID = serializers.CharField(read_only=True)
@@ -89,6 +90,7 @@ class SenderDetailsSerializer(serializers.ModelSerializer):
     ]
     service_name = serializers.ChoiceField(choices=SERVICE_CHOICES, required=True)
     verified_no = serializers.CharField(max_length=1200, required=False, label="Registered Number if any")
+    default = serializers.BooleanField()
 
     def create(self, validated_data):
         senderID = validated_data["senderID"]["senderID"]
@@ -99,14 +101,27 @@ class SenderDetailsSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         instance.token = validated_data.get('token', instance.token)
         instance.sid = validated_data.get('sid', instance.sid)
-        if instance.verfied_no:
-            instance.verfied_no = validated_data.get('verfied_no', instance.verfied_no)
+        instance.default = validated_data.get('default', instance.default)
+        instance.verified_no = validated_data.get('verified_no', instance.verified_no)
+        print(instance.senderID)
+        if instance.default == True:
+            other_inst = SenderDetails.objects.get(senderID=instance.senderID, default=True)
+            print(other_inst)
+            other_inst.default = False
+            other_inst.save()
+        else:
+            try:
+                other_inst = SenderDetails.objects.get(senderID=instance.senderID, default=True)
+            except ObjectDoesNotExist:
+                other_inst = SenderDetails.objects.filter(senderID=instance.senderID, default=False)[0]
+                other_inst.default = True
+                other_inst.save()        
         instance.save()
         return instance
 
 
     class Meta:
         model = SenderDetails
-        fields = ("sid", "token", "service_name", "sender", "verified_no")
+        fields = ( "sender", "service_name", "token", "sid" , "verified_no", "default")
 
     
